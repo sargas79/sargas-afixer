@@ -2,6 +2,16 @@
 
 A Foundry VTT **V14** module for the **Pathfinder 2e** system (8.7+). It lets players affix spellhearts to armor and weapons, applies the buffs each spellheart gives automatically, and shows those buffs on the character sheet.
 
+## Install
+
+In Foundry, go to **Add-on Modules → Install Module** and paste this manifest URL:
+
+```
+https://github.com/sargas79/sargas-afixer/releases/latest/download/module.json
+```
+
+Then enable **Sargas Affixer** in a PF2e world.
+
 ## What it does
 
 - **Affix / Detach.** Every spellheart in a character's inventory gets a 🔗 button. It opens a picker with all of that character's armor, weapons and shields. Items that can't take the spellheart are greyed out with the reason, for example "not metal" or "already has the maximum number of affixed items".

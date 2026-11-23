@@ -99,6 +99,12 @@
     opacity: 0.6;
 }
 
+.sargas-missing {
+    font-size: var(--font-size-10, 10px);
+    text-transform: uppercase;
+    color: #b45309;
+}
+
 .sargas-buffs {
     list-style: disc;
     margin: 2px 0 0 2.6rem;

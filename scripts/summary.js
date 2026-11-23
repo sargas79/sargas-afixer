@@ -5,13 +5,14 @@ import { slugOf } from "./effects.js";
  * Turn an effect's rule elements into short, readable lines ("+1 item bonus to Athletics", "Resistance 5 fire").
  * Works on rule *sources*, so it can describe an effect before it is applied. Tier-specific rules for other
  * tiers of the spellheart are dropped; rules whose predicate depends on the situation are tagged.
+ * Pass `tierSlug` (from effects.tierSlugFor) so the described tier matches the one applied.
  *
  * @returns {{text: string, situational: boolean}[]}
  */
-export function summarizeEffect(effectDoc, { spellheart, host }) {
+export function summarizeEffect(effectDoc, { spellheart, host, tierSlug }) {
     const rules = foundry.utils.deepClone(effectDoc._source?.system?.rules ?? effectDoc.system?.rules ?? []);
     const actor = spellheart.actor;
-    const slug = slugOf(spellheart);
+    const slug = tierSlug ?? slugOf(spellheart);
 
     // Tier roll options set by the effect's ChoiceSet (e.g. "flaming-star:flaming-star-greater")
     const tierPrefixes = rules

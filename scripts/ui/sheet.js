@@ -1,6 +1,6 @@
 import { esc, loc, setting } from "../constants.js";
 import { activate, detach } from "../affix.js";
-import { effectsForHost, effectsOf } from "../effects.js";
+import { effectsForHost, effectsOf, refreshOpenSheets, syncActor, tierSlugFor } from "../effects.js";
 import { summarizeEffect } from "../summary.js";
 import { getAttachments, getHost, isHostType, isSpellheart } from "../validation.js";
 import { openAffixPicker } from "./picker.js";
@@ -29,8 +29,9 @@ function durationLabel(doc) {
     return loc("Duration.Value", { value: d.value, unit: game.i18n.localize(CONFIG.PF2E?.timeUnits?.[d.unit] ?? d.unit) });
 }
 
-function summaryList(doc, spellheart, host) {
-    const lines = summarizeEffect(doc, { spellheart, host });
+async function summaryList(info, live, spellheart, host) {
+    const tierSlug = await tierSlugFor(spellheart, info.doc._source?.system?.rules ?? info.doc.system?.rules ?? []);
+    const lines = summarizeEffect(live ?? info.doc, { spellheart, host, tierSlug });
     if (!lines.length) return `<li class="sargas-buff muted">${loc("Panel.SeeDescription")}</li>`;
     return lines
         .map(
@@ -55,40 +56,48 @@ export async function buildHostPanel(host, { editable }) {
         const stateKey = active ? "Panel.Active" : "Panel.Inactive";
         const stateTip = active ? "" : ` data-tooltip="${esc(loc("Panel.InactiveHint", { host: host.name }))}"`;
 
-        const passiveHtml = passive
-            .map((info) => {
-                const live = applied.find((e) => e.flags["sargas-affixer"].effect === info.uuid);
-                return `<div class="sargas-effect passive${live ? " applied" : ""}">
+        const passiveParts = [];
+        for (const info of passive) {
+            const live = applied.find((e) => e.flags["sargas-affixer"].effect === info.uuid);
+            const missing = active && !live;
+            const reapply = editable
+                ? `<button type="button" class="sargas-activate" data-sargas-action="reapply"><i class="fa-solid fa-rotate"></i> ${loc("Panel.Reapply")}</button>`
+                : "";
+            const missingHtml = missing
+                ? `<span class="sargas-missing" data-tooltip="${esc(loc("Panel.MissingHint"))}"><i class="fa-solid fa-triangle-exclamation"></i> ${loc("Panel.Missing")}</span>${reapply}`
+                : "";
+            passiveParts.push(`<div class="sargas-effect passive${live ? " applied" : ""}${missing ? " missing" : ""}">
                     <div class="sargas-effect-head">
                         <img src="${esc(info.img)}" alt="">
                         <a class="sargas-effect-name" data-sargas-action="open-effect" data-effect-id="${live?.id ?? ""}" data-effect-uuid="${esc(info.uuid)}">${esc(info.name)}</a>
                         <span class="sargas-tag">${loc("Panel.Passive")}</span>
+                        ${missingHtml}
                     </div>
-                    <ul class="sargas-buffs">${summaryList(live ?? info.doc, spellheart, host)}</ul>
-                </div>`;
-            })
-            .join("");
+                    <ul class="sargas-buffs">${await summaryList(info, live, spellheart, host)}</ul>
+                </div>`);
+        }
+        const passiveHtml = passiveParts.join("");
 
-        const activatedHtml = activated
-            .map((info) => {
-                const live = applied.find((e) => e.flags["sargas-affixer"].effect === info.uuid);
-                const duration = durationLabel(info.doc);
-                const button =
-                    editable && active
-                        ? `<button type="button" class="sargas-activate" data-sargas-action="activate" data-effect-uuid="${esc(info.uuid)}">
-                            <i class="fa-solid fa-bolt"></i> ${live ? loc("Panel.Reactivate") : loc("Panel.Activate")}</button>`
-                        : "";
-                return `<div class="sargas-effect activated${live ? " applied" : ""}">
-                    <div class="sargas-effect-head">
-                        <img src="${esc(info.img)}" alt="">
-                        <a class="sargas-effect-name" data-sargas-action="open-effect" data-effect-id="${live?.id ?? ""}" data-effect-uuid="${esc(info.uuid)}">${esc(info.name)}</a>
-                        <span class="sargas-tag">${live ? loc("Panel.Running") : loc("Panel.OnActivation")}${duration ? ` · ${esc(duration)}` : ""}</span>
-                        ${button}
-                    </div>
-                    <ul class="sargas-buffs">${summaryList(live ?? info.doc, spellheart, host)}</ul>
-                </div>`;
-            })
-            .join("");
+        const activatedParts = [];
+        for (const info of activated) {
+            const live = applied.find((e) => e.flags["sargas-affixer"].effect === info.uuid);
+            const duration = durationLabel(info.doc);
+            const button =
+                editable && active
+                    ? `<button type="button" class="sargas-activate" data-sargas-action="activate" data-effect-uuid="${esc(info.uuid)}">
+                        <i class="fa-solid fa-bolt"></i> ${live ? loc("Panel.Reactivate") : loc("Panel.Activate")}</button>`
+                    : "";
+            activatedParts.push(`<div class="sargas-effect activated${live ? " applied" : ""}">
+                <div class="sargas-effect-head">
+                    <img src="${esc(info.img)}" alt="">
+                    <a class="sargas-effect-name" data-sargas-action="open-effect" data-effect-id="${live?.id ?? ""}" data-effect-uuid="${esc(info.uuid)}">${esc(info.name)}</a>
+                    <span class="sargas-tag">${live ? loc("Panel.Running") : loc("Panel.OnActivation")}${duration ? ` · ${esc(duration)}` : ""}</span>
+                    ${button}
+                </div>
+                <ul class="sargas-buffs">${await summaryList(info, live, spellheart, host)}</ul>
+            </div>`);
+        }
+        const activatedHtml = activatedParts.join("");
 
         const manual =
             !passive.length && !activated.length ? `<p class="sargas-manual">${loc("Panel.NoAutomation")}</p>` : "";
@@ -138,6 +147,9 @@ async function onPanelClick(event, host) {
             return detach(spellheart);
         case "activate":
             return activate(spellheart, target.dataset.effectUuid);
+        case "reapply":
+            await syncActor(host.actor);
+            return refreshOpenSheets(host.actor);
     }
 }
 

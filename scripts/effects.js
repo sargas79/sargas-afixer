@@ -1,6 +1,6 @@
 import { EFFECTS_PACK, INTERNAL, MODULE_ID, loc, setting } from "./constants.js";
 import { OVERRIDES } from "./mapping.js";
-import { getHostId, isHostType, isSpellheart } from "./validation.js";
+import { canHost, getHostId, isHostType, isSpellheart } from "./validation.js";
 
 const LINK_RE = /@UUID\[(Compendium\.pf2e\.equipment-effects\.(?:Item\.)?[^\]]+)\]/g;
 const TIER_RE = /\s*\((?:Lesser|Minor|Moderate|Greater|Major|True)\)\s*$/i;
@@ -130,7 +130,7 @@ function predicateMentions(predicate, atom) {
 }
 
 /** Tier slug used by the effect's ChoiceSet ("flaming-star-greater"), preferring the compendium original */
-async function tierSlugFor(spellheart, rules) {
+export async function tierSlugFor(spellheart, rules) {
     const own = slugOf(spellheart);
     const mentions = (slug) =>
         rules.some(
@@ -227,21 +227,26 @@ async function doSync(actor) {
     if (!actor.isOwner) return;
     const items = actor.items;
 
-    // 1. Detach spellhearts whose host is gone or invalid
+    // 1. Detach spellhearts whose host is gone or no longer meets the spellheart's requirements
     const detached = [];
     for (const item of items) {
         const hostId = getHostId(item);
         if (!hostId) continue;
         const host = items.get(hostId);
-        if (!isSpellheart(item) || !host || !isHostType(host) || host.id === item.id) detached.push(item);
+        if (!isSpellheart(item) || !host || !isHostType(host) || host.id === item.id) {
+            detached.push({ item, message: loc("Info.HostRemoved", { name: item.name }) });
+            continue;
+        }
+        const check = canHost(item, host, { ignoreSlots: true });
+        if (!check.ok) detached.push({ item, message: loc("Info.HostInvalid", { name: item.name, reason: check.reason }) });
     }
     if (detached.length) {
         await actor.updateEmbeddedDocuments(
             "Item",
-            detached.map((i) => ({ _id: i.id, [`flags.${MODULE_ID}.host`]: null })),
+            detached.map(({ item }) => ({ _id: item.id, [`flags.${MODULE_ID}.host`]: null })),
             INTERNAL,
         );
-        for (const item of detached) ui.notifications.info(loc("Info.HostRemoved", { name: item.name }));
+        for (const { message } of detached) ui.notifications.info(message);
     }
 
     // 2. Remove effects that no longer belong

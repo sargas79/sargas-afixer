@@ -80,8 +80,10 @@ export function slotLimit(actor) {
     return limit;
 }
 
+/** Id of the item a spellheart is affixed to. Module-created effects also carry a host flag; they are not affixed. */
 export function getHostId(item) {
-    return item?.flags?.[MODULE_ID]?.host ?? null;
+    if (!item || item.type === "effect") return null;
+    return item.flags?.[MODULE_ID]?.host ?? null;
 }
 
 export function getHost(item) {
@@ -94,16 +96,11 @@ export function getAttachments(host) {
     return host.actor.items.filter((i) => getHostId(i) === host.id);
 }
 
-/** "armor" | "weapon" | "shield" — which benefit of the spellheart applies */
-export function hostMode(host) {
-    return host.type;
-}
-
 /**
  * Check whether `spellheart` may be affixed to `host`.
  * @returns {{ok: boolean, reason?: string, needsConfirm?: string}}
  */
-export function canHost(spellheart, host) {
+export function canHost(spellheart, host, { ignoreSlots = false } = {}) {
     if (!isSpellheart(spellheart)) return { ok: false, reason: loc("Warn.NotSpellheart", { name: spellheart?.name }) };
     if (!host?.actor || host.actor !== spellheart.actor) return { ok: false, reason: loc("Warn.DifferentActor") };
     if (!isHostType(host)) return { ok: false, reason: loc("Warn.InvalidHostType", { host: host.name }) };
@@ -138,6 +135,7 @@ export function canHost(spellheart, host) {
         if (!req.shield) return { ok: false, reason: loc("Warn.NotForShield", { name: spellheart.name }) };
     }
 
+    if (ignoreSlots) return { ok: true, needsConfirm };
     const others = getAttachments(host).filter((i) => i.id !== spellheart.id);
     const limit = slotLimit(host.actor);
     if (others.length >= limit) return { ok: false, reason: loc("Warn.NoSlots", { host: host.name, limit }) };

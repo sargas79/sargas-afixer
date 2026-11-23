@@ -56,6 +56,9 @@
             "Running": "Running",
             "Activate": "Activate",
             "Reactivate": "Reapply",
+            "Missing": "Missing",
+            "MissingHint": "This benefit's effect was removed from the character. Re-apply it to restore the benefit.",
+            "Reapply": "Re-apply",
             "Situational": "Applies only in some situations; PF2e checks this when you roll.",
             "SeeDescription": "See the effect's description.",
             "NoAutomation": "No automated benefit found for this spellheart. Check its description.",
@@ -75,7 +78,8 @@
             "Detached": "<strong>{actor}</strong> removes <strong>{spellheart}</strong> from <strong>{host}</strong>."
         },
         "Info": {
-            "HostRemoved": "{name} was detached because the item it was affixed to is gone."
+            "HostRemoved": "{name} was detached because the item it was affixed to is gone.",
+            "HostInvalid": "{name} was detached: {reason}"
         },
         "Warn": {
             "NotSpellheart": "{name} is not a spellheart.",

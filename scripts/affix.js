@@ -2,15 +2,25 @@ import { INTERNAL, MODULE_ID, esc, loc, setting } from "./constants.js";
 import { activateEffect, refreshOpenSheets, syncActor } from "./effects.js";
 import { canHost, getHost, isSpellheart } from "./validation.js";
 
-/** Split one unit off a stack and return the new single item */
-async function splitOne(item) {
-    const source = item.toObject();
-    delete source._id;
-    source.system.quantity = 1;
-    if (source.flags?.[MODULE_ID]) delete source.flags[MODULE_ID];
-    await item.update({ "system.quantity": item.quantity - 1 }, INTERNAL);
-    const [created] = await item.actor.createEmbeddedDocuments("Item", [source], INTERNAL);
-    return created;
+/**
+ * Reduce a stack to a single unit and move the rest into a new item. The original keeps its id and equipped
+ * state, so it becomes the affixed unit; with `unequipRest` the split-off remainder is stowed rather than a
+ * second held or worn copy.
+ */
+async function isolateOne(item, { unequipRest = false } = {}) {
+    if (!(item.quantity > 1)) return item;
+    const rest = item.toObject();
+    delete rest._id;
+    rest.system.quantity = item.quantity - 1;
+    if (rest.flags?.[MODULE_ID]) delete rest.flags[MODULE_ID];
+    if (unequipRest && rest.system.equipped) {
+        rest.system.equipped.carryType = "worn";
+        rest.system.equipped.handsHeld = 0;
+        rest.system.equipped.inSlot = false;
+    }
+    await item.update({ "system.quantity": 1 }, INTERNAL);
+    await item.actor.createEmbeddedDocuments("Item", [rest], INTERNAL);
+    return item;
 }
 
 async function postChat(actor, content) {
@@ -43,8 +53,8 @@ export async function affix(spellheart, host, { skipConfirm = false } = {}) {
     const actor = spellheart.actor;
     if (getHost(spellheart)) await detach(spellheart, { silent: true });
 
-    const target = spellheart.quantity > 1 ? await splitOne(spellheart) : spellheart;
-    const hostItem = host.quantity > 1 ? await splitOne(host) : host;
+    const target = await isolateOne(spellheart);
+    const hostItem = await isolateOne(host, { unequipRest: true });
 
     await target.update({ [`flags.${MODULE_ID}.host`]: hostItem.id }, INTERNAL);
     await syncActor(actor);
