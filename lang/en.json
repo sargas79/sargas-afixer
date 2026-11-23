@@ -1,0 +1,131 @@
+{
+    "SARGAS_AFFIXER": {
+        "Settings": {
+            "RequireEquipped": {
+                "Name": "Benefits require equipped gear",
+                "Hint": "A spellheart's benefits only apply while its armor is worn or its weapon or shield is held. Turn off to apply them whenever the spellheart is affixed."
+            },
+            "MaxAffixes": {
+                "Name": "Spellhearts per item",
+                "Hint": "How many spellhearts (or talismans) one item can carry. The rules allow one."
+            },
+            "TalismanicSage": {
+                "Name": "Talismanic Sage adds a slot",
+                "Hint": "Characters with the Talismanic Sage feat can affix one more item to each piece of gear."
+            },
+            "ChatMessages": {
+                "Name": "Post affix messages to chat",
+                "Hint": "Post a chat message when a spellheart is affixed or detached."
+            },
+            "ShowPanel": {
+                "Name": "Show benefit panel in inventory",
+                "Hint": "Show the affixed spellhearts and their benefits under each armor and weapon in the character sheet inventory."
+            }
+        },
+        "HostType": {
+            "armor": "Armor",
+            "weapon": "Weapon",
+            "shield": "Shield"
+        },
+        "Row": {
+            "Affix": "Affix to armor or weapon",
+            "Detach": "Detach",
+            "AffixedTo": "Affixed to {host}"
+        },
+        "Picker": {
+            "Title": "Affix {name}",
+            "Prompt": "Choose the armor or weapon to affix <strong>{name}</strong> to.",
+            "ActivityNote": "Affixing a spellheart takes 10 minutes (Affix a Spellheart).",
+            "Affix": "Affix",
+            "Cancel": "Cancel",
+            "Equipped": "Equipped",
+            "NotEquipped": "Not equipped",
+            "Current": "Current"
+        },
+        "Confirm": {
+            "Title": "Check the material",
+            "Metal": "This spellheart must be affixed to metal armor. Is {host} made of metal?",
+            "NonMetal": "This spellheart must be affixed to non-metal armor. Is {host} free of metal?"
+        },
+        "Panel": {
+            "Active": "Active",
+            "Inactive": "Inactive",
+            "InactiveHint": "Equip {host} to gain these benefits.",
+            "Passive": "Passive",
+            "OnActivation": "On activation",
+            "Running": "Running",
+            "Activate": "Activate",
+            "Reactivate": "Reapply",
+            "Situational": "Applies only in some situations; PF2e checks this when you roll.",
+            "SeeDescription": "See the effect's description.",
+            "NoAutomation": "No automated benefit found for this spellheart. Check its description.",
+            "PostToChat": "Post to chat",
+            "Detach": "Detach"
+        },
+        "ItemSheet": {
+            "Affixed": "Affixed spellhearts",
+            "NotAffixed": "Not affixed."
+        },
+        "Duration": {
+            "Encounter": "encounter",
+            "Value": "{value} {unit}"
+        },
+        "Chat": {
+            "Affixed": "<strong>{actor}</strong> affixes <strong>{spellheart}</strong> to <strong>{host}</strong>.",
+            "Detached": "<strong>{actor}</strong> removes <strong>{spellheart}</strong> from <strong>{host}</strong>."
+        },
+        "Info": {
+            "HostRemoved": "{name} was detached because the item it was affixed to is gone."
+        },
+        "Warn": {
+            "NotSpellheart": "{name} is not a spellheart.",
+            "DifferentActor": "The spellheart and the item must belong to the same character.",
+            "InvalidHostType": "{host} can't hold a spellheart.",
+            "NotForArmor": "{name} can't be affixed to armor.",
+            "NotForWeapon": "{name} can't be affixed to a weapon.",
+            "NotForShield": "{name} can't be affixed to a shield.",
+            "NeedsMetal": "{host} is not metal.",
+            "NeedsNonMetal": "{host} is made of metal.",
+            "NeedsMelee": "{host} is not a melee weapon.",
+            "NeedsRanged": "{host} is not a ranged weapon.",
+            "WrongGroup": "{host} is not the right kind of weapon.",
+            "NoSlots": "{host} already has the maximum number of affixed items ({limit}).",
+            "NoValidHosts": "{name} has nothing it can be affixed to.",
+            "NotAffixed": "{name} is not affixed to anything.",
+            "HostNotEquipped": "Equip {host} first."
+        },
+        "Summary": {
+            "Bonus": "{value} {type} bonus to {selector}",
+            "Penalty": "{value} {type} penalty to {selector}",
+            "ModifierVaries": "{type} modifier to {selector}",
+            "Resistance": "Resistance {value} to {type}",
+            "Weakness": "Weakness {value} to {type}",
+            "Immunity": "Immunity to {type}",
+            "DamageDice": "+{dice} {type} damage {where}",
+            "OnStrikes": "on Strikes with {host}",
+            "OnSelector": "to {selector}",
+            "Sense": "{sense}{acuity}{range}",
+            "Note": "Note: {title}",
+            "AdjustStrike": "Strikes with {host}: {change}",
+            "AdjustDegree": "Better outcome on {selector}",
+            "Aura": "Aura ({radius} ft.)",
+            "Speed": "{type} speed {value} ft.",
+            "ItemAlteration": "Changes the item's {property}",
+            "ActiveEffectLike": "Adjusts {path}",
+            "Varies": "varies",
+            "Selector": {
+                "Damage": "damage with {host}",
+                "Attack": "attack rolls with {host}",
+                "AC": "AC",
+                "Perception": "Perception",
+                "Saves": "saving throws",
+                "Skills": "skill checks",
+                "SpellAttack": "spell attack rolls",
+                "SpellDC": "spell DCs",
+                "Speeds": "all Speeds",
+                "LandSpeed": "land Speed",
+                "Initiative": "initiative"
+            }
+        }
+    }
+}

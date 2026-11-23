@@ -1,0 +1,199 @@
+/* ---------- Inventory rows ---------- */
+.sargas-affixed-to {
+    margin-left: 0.4em;
+    font-size: var(--font-size-11, 11px);
+    opacity: 0.75;
+    white-space: nowrap;
+}
+
+.sargas-badges {
+    display: inline-flex;
+    gap: 2px;
+    margin-left: 0.35em;
+    align-items: center;
+}
+
+.sargas-badge {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--color-border-highlight, #ff6400);
+    border-radius: 3px;
+    object-fit: cover;
+}
+
+.sargas-badge.inactive {
+    filter: grayscale(1);
+    opacity: 0.6;
+    border-color: var(--color-border-light-tertiary, #999);
+}
+
+/* ---------- Benefit panel ---------- */
+.sargas-affix-panel {
+    margin: 2px 0 6px 2.25rem;
+    padding: 4px 6px;
+    border-left: 3px solid var(--color-border-highlight, #ff6400);
+    background: rgba(0, 0, 0, 0.04);
+    font-size: var(--font-size-12, 12px);
+}
+
+.sargas-entry + .sargas-entry {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed rgba(0, 0, 0, 0.2);
+}
+
+.sargas-entry-head,
+.sargas-effect-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.sargas-entry-head img,
+.sargas-effect-head img {
+    width: 20px;
+    height: 20px;
+    border: none;
+    flex: none;
+}
+
+.sargas-entry-name {
+    font-weight: bold;
+}
+
+.sargas-mode,
+.sargas-tag {
+    font-size: var(--font-size-10, 10px);
+    text-transform: uppercase;
+    opacity: 0.7;
+}
+
+.sargas-state {
+    font-size: var(--font-size-10, 10px);
+    text-transform: uppercase;
+    padding: 0 4px;
+    border-radius: 3px;
+}
+
+.sargas-state.active {
+    background: #2e7d32;
+    color: #fff;
+}
+
+.sargas-state.inactive {
+    background: #8a8a8a;
+    color: #fff;
+}
+
+.sargas-entry-controls {
+    margin-left: auto;
+    display: flex;
+    gap: 6px;
+}
+
+.sargas-effect {
+    margin: 4px 0 0 1.5rem;
+}
+
+.sargas-effect.activated:not(.applied) .sargas-effect-head img {
+    opacity: 0.6;
+}
+
+.sargas-buffs {
+    list-style: disc;
+    margin: 2px 0 0 2.6rem;
+    padding: 0;
+}
+
+.sargas-buff.situational {
+    font-style: italic;
+}
+
+.sargas-buff.muted,
+.sargas-manual {
+    opacity: 0.7;
+    font-style: italic;
+}
+
+.sargas-activate,
+.sargas-inline-button {
+    flex: none;
+    width: auto;
+    height: auto;
+    line-height: 1.4;
+    padding: 0 6px;
+    margin-left: auto;
+    font-size: var(--font-size-11, 11px);
+}
+
+/* ---------- Picker ---------- */
+.sargas-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 22rem;
+    overflow-y: auto;
+}
+
+.sargas-host {
+    display: grid;
+    grid-template-columns: auto 28px 1fr auto;
+    grid-template-rows: auto auto;
+    column-gap: 6px;
+    align-items: center;
+    padding: 3px 4px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.sargas-host:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.sargas-host.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.sargas-host img {
+    grid-row: span 2;
+    width: 28px;
+    height: 28px;
+    border: none;
+}
+
+.sargas-host input {
+    grid-row: span 2;
+}
+
+.sargas-host-hint {
+    grid-column: 3 / span 2;
+    font-size: 0.8em;
+    opacity: 0.75;
+}
+
+.sargas-mini {
+    width: 16px;
+    height: 16px;
+    border: none;
+}
+
+.sargas-picker-note {
+    font-size: 0.85em;
+    opacity: 0.75;
+}
+
+/* ---------- Item sheet ---------- */
+.sargas-item-sheet {
+    margin-bottom: 0.5rem;
+}
+
+.sargas-item-sheet .sargas-affix-panel {
+    margin-left: 0;
+}
+
+.sargas-item-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
