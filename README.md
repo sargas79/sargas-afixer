@@ -50,6 +50,21 @@ Spellhearts that have no PF2e effect still affix and show a "no automated benefi
 - Sync runs on the client of the user who made the change, and once on the GM's client at startup as a repair pass.
 - Exceptions to the automatic effect lookup go in [scripts/mapping.js](scripts/mapping.js).
 
+## Releasing
+
+Releases are built by [.github/workflows/release.yml](.github/workflows/release.yml):
+
+1. Bump `version` in `module.json` and merge the change to `main`.
+2. Tag that commit and push the tag:
+   ```
+   git tag v0.2.0
+   git push origin v0.2.0
+   ```
+
+The workflow checks that the tag matches `module.json` and validates the JSON and scripts. It then sets the `manifest` and `download` URLs for that tag, builds `sargas-affixer.zip`, and publishes a GitHub release with the zip, `module.json` and generated notes.
+- A tag with a suffix, such as `v0.2.0-beta.1`, becomes a pre-release. Foundry's `latest` manifest URL does not offer pre-releases.
+- Re-running the workflow on an existing release replaces its files.
+
 ## Not included yet
 
 - Talismans (affix → use → consume).
