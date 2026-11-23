@@ -1,0 +1,76 @@
+# Publishes a Foundry release when a version tag is pushed:
+#   1. bump "version" in module.json and merge it to main
+#   2. git tag v<version> && git push origin v<version>
+# The workflow checks the tag matches module.json, fills in the manifest/download URLs for that tag,
+# builds the module zip and attaches it with module.json to a GitHub release.
+# Tags with a suffix (v0.2.0-beta.1) become pre-releases, which Foundry's "latest" manifest URL skips.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check that the tag matches module.json
+        run: |
+          version="$(jq -r .version module.json)"
+          if [ "v${version}" != "${GITHUB_REF_NAME}" ]; then
+            echo "::error file=module.json::module.json has version ${version}, but the tag is ${GITHUB_REF_NAME}. Bump the version before tagging."
+            exit 1
+          fi
+
+      - name: Validate JSON and scripts
+        run: |
+          jq empty module.json lang/*.json
+          find scripts -name '*.js' -print0 | xargs -0 -n1 node --check
+
+      - name: Build module package
+        run: |
+          repo_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}"
+          module_id="$(jq -r .id module.json)"
+          echo "MODULE_ID=${module_id}" >> "$GITHUB_ENV"
+          mkdir -p dist
+          jq --arg url "$repo_url" --arg tag "$GITHUB_REF_NAME" --arg id "$module_id" '
+            .url = $url
+            | .bugs = "\($url)/issues"
+            | .manifest = "\($url)/releases/latest/download/module.json"
+            | .download = "\($url)/releases/download/\($tag)/\($id).zip"
+          ' module.json > dist/module.json
+          # The zip carries the same manifest as the release asset
+          cp dist/module.json module.json
+          zip -r "dist/${module_id}.zip" module.json LICENSE README.md lang scripts styles
+          unzip -l "dist/${module_id}.zip"
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          assets=(dist/module.json "dist/${MODULE_ID}.zip")
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then
+            echo "Release ${GITHUB_REF_NAME} exists; replacing its assets."
+            gh release upload "$GITHUB_REF_NAME" "${assets[@]}" --clobber
+          else
+            flags=()
+            case "$GITHUB_REF_NAME" in *-*) flags+=(--prerelease) ;; esac
+            gh release create "$GITHUB_REF_NAME" "${assets[@]}" \
+              --verify-tag \
+              --title "Sargas Affixer ${GITHUB_REF_NAME}" \
+              --generate-notes \
+              "${flags[@]}"
+          fi
